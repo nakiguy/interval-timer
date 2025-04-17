@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interval Timer</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <h1>Interval Timer</h1>
+  <label>Work (sec): <input type="number" id="workTime" value="30"></label>
+  <label>Rest (sec): <input type="number" id="restTime" value="10"></label>
+  <label>Rounds: <input type="number" id="rounds" value="5"></label>
+  
+  <div id="display">00:00</div>
+  <div id="status">Ready</div>
+  <button id="startBtn">Start</button>
+  <button id="resetBtn">Reset</button>
+
+  <audio id="beep" src="beep.mp3" preload="auto"></audio>
+  <script src="script.js"></script>
+</body>
+</html>
