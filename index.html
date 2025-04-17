@@ -33,6 +33,9 @@
   <button id="pauseBtn">Pause</button>
   <button id="resetBtn">Reset</button>
 
+  <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+  <audio id="announce" src=""></audio>
+
   <script>
     let interval;
     let isRunning = false;
@@ -40,6 +43,7 @@
     let currentRound = 1;
     let isWork = true;
     let timeLeft = 0;
+    let workDuration = 0;
 
     const workoutsInput = document.getElementById('workouts');
     const workInput = document.getElementById('workTime');
@@ -48,6 +52,7 @@
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const beep = document.getElementById('beep');
 
     const restTime = 15;
 
@@ -67,7 +72,8 @@
       isPaused = false;
       isWork = true;
       currentRound = 1;
-      timeLeft = parseInt(workInput.value);
+      workDuration = parseInt(workInput.value);
+      timeLeft = workDuration;
       updateStatus();
       updateDisplay();
       interval = setInterval(tick, 1000);
@@ -76,6 +82,18 @@
     function tick() {
       if (timeLeft > 0) {
         timeLeft--;
+
+        // Audio and spoken alerts
+        if (isWork) {
+          if (timeLeft === Math.floor(workDuration / 2)) {
+            speak("Half the time is done");
+          } else if (timeLeft === 10) {
+            speak("10 seconds left");
+          } else if (timeLeft <= 3 && timeLeft > 0) {
+            beep.play();
+          }
+        }
+
         updateDisplay();
       } else {
         if (isWork) {
@@ -88,11 +106,16 @@
             resetTimer();
             return;
           }
-          timeLeft = parseInt(workInput.value);
+          timeLeft = workDuration;
         }
         updateStatus();
         updateDisplay();
       }
+    }
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(msg);
     }
 
     function pauseTimer() {
