@@ -31,16 +31,23 @@
       width: 50%;
       margin-bottom: 5px;
     }
+    #currentWorkout {
+      font-size: 1.5rem;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>Interval Timer</h1>
-  <div class="workout-list" id="workoutChecklist"></div>
+  <div class="workout-list" id="workoutChecklist">
+    <label style="width: 100%"><input type="checkbox" id="selectAll"> Select All Workouts</label>
+  </div>
   <label>Work Duration (sec): <input type="number" id="workTime" value="30"></label>
   <p>Rest time between workouts is fixed at 15 seconds.</p>
 
   <div id="display">00:00</div>
   <div id="status">Ready</div>
+  <div id="currentWorkout"></div>
   <button id="startBtn">Start</button>
   <button id="pauseBtn">Pause</button>
   <button id="resetBtn">Reset</button>
@@ -65,30 +72,44 @@
     const resetBtn = document.getElementById('resetBtn');
     const beep = document.getElementById('beep');
     const workoutChecklist = document.getElementById('workoutChecklist');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const currentWorkoutLabel = document.getElementById('currentWorkout');
 
     const restTime = 15;
     let totalRounds = 0;
+    let selectedWorkouts = [];
+    let workoutsData = [];
 
-    // Create checkboxes for workouts 1-17
-// Fetch workout list from JSON file
-fetch('workouts.json')
-  .then(response => response.json())
-  .then(workouts => {
-    workouts.forEach((workout, index) => {
-      const label = document.createElement('label');
-      label.innerHTML = `<input type="checkbox" class="workout-checkbox" value="${index + 1}"> ${workout}`;
-      workoutChecklist.appendChild(label);
-    });
-  });
+    // Fetch workout list from external JSON file
+    fetch('workouts.json')
+      .then(response => response.json())
+      .then(workouts => {
+        workoutsData = workouts;
+        workouts.forEach((workout, index) => {
+          const label = document.createElement('label');
+          label.innerHTML = `<input type="checkbox" class="workout-checkbox" value="${index}"> ${workout}`;
+          workoutChecklist.appendChild(label);
+        });
 
+        // Select all toggle
+        selectAllCheckbox.addEventListener('change', () => {
+          const checkboxes = document.querySelectorAll('.workout-checkbox');
+          checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+        });
+      });
 
     startBtn.addEventListener('click', () => {
       if (!isRunning) {
-        totalRounds = document.querySelectorAll('.workout-checkbox:checked').length;
-        if (totalRounds === 0) {
+        const checked = document.querySelectorAll('.workout-checkbox:checked');
+        if (checked.length === 0) {
           alert("Please select at least one workout.");
           return;
         }
+        selectedWorkouts = Array.from(checked).map(cb => workoutsData[cb.value]);
+        totalRounds = selectedWorkouts.length;
+
+        workoutChecklist.style.display = 'none';
+        selectAllCheckbox.parentElement.style.display = 'none';
         startTimer();
       } else if (isPaused) {
         resumeTimer();
@@ -173,8 +194,11 @@ fetch('workouts.json')
     function updateStatus() {
       if (currentRound > totalRounds) {
         status.textContent = "Done!";
+        currentWorkoutLabel.textContent = "";
       } else {
+        const currentWorkout = selectedWorkouts[currentRound - 1];
         status.textContent = `${isWork ? 'Work' : 'Rest'} - Workout ${currentRound}`;
+        currentWorkoutLabel.textContent = isWork ? `Current: ${currentWorkout}` : '';
       }
     }
 
@@ -187,6 +211,9 @@ fetch('workouts.json')
       isWork = true;
       display.textContent = "00:00";
       status.textContent = "Ready";
+      currentWorkoutLabel.textContent = "";
+      workoutChecklist.style.display = 'flex';
+      selectAllCheckbox.parentElement.style.display = 'block';
     }
   </script>
 </body>
