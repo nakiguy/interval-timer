@@ -57,6 +57,8 @@
   <button id="pauseBtn">Pause</button>
   <button id="resetBtn">Reset</button>
 
+  <audio id="beepSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+
   <script>
     let timerInterval;
     let isRunning = false;
@@ -74,9 +76,26 @@
     const workInput = document.getElementById('workTime');
     const selectAllCheckbox = document.getElementById('selectAll');
     const currentWorkoutLabel = document.getElementById('currentWorkout');
+    const beepSound = document.getElementById('beepSound');
 
     let selectedWorkouts = [];
     let workoutsData = [];
+
+    const synth = window.speechSynthesis;
+
+    function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = synth.getVoices();
+    const soothingVoice = voices.find(voice =>
+    voice.name.includes("Google UK English Female") ||
+    voice.name.includes("Microsoft Zira") ||
+    voice.name.toLowerCase().includes("soft") ||
+    voice.default
+    );
+    utterance.voice = soothingVoice;
+    utterance.rate = 0.9; // Slightly slower for calmness
+    synth.speak(utterance);
+    }
 
     fetch('workouts.json')
       .then(response => response.json())
@@ -109,17 +128,31 @@
       isWork = true;
       timeLeft = parseInt(workInput.value);
       updateDisplay(timeLeft);
+      speak(`Starting workout: ${selectedWorkouts[0]}`);
 
       timerInterval = setInterval(() => {
         if (timeLeft > 0) {
           timeLeft--;
           updateDisplay(timeLeft);
+
+          if (timeLeft === Math.floor(parseInt(workInput.value) / 2)) {
+            speak("Halfway there");
+          }
+
+          if (timeLeft === 10) {
+            speak("10 seconds left");
+          }
+
+          if (timeLeft <= 3 && timeLeft > 0) {
+            beepSound.play();
+          }
         } else {
           if (isWork) {
             isWork = false;
             timeLeft = 15;
             status.textContent = `Rest - Round ${currentRound}`;
             currentWorkoutLabel.textContent = `Rest - Round ${currentRound}`;
+            speak("Time to rest");
           } else {
             isWork = true;
             currentRound++;
@@ -127,10 +160,12 @@
               clearInterval(timerInterval);
               status.textContent = "Workout Complete!";
               currentWorkoutLabel.textContent = "All workouts are done!";
+              speak("Workout complete");
             } else {
               timeLeft = parseInt(workInput.value);
               status.textContent = `Work - Round ${currentRound}`;
               currentWorkoutLabel.textContent = `Current: ${selectedWorkouts[currentRound - 1]}`;
+              speak(`Starting workout: ${selectedWorkouts[currentRound - 1]}`);
             }
           }
         }
