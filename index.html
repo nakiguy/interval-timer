@@ -4,7 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Interval Timer</title>
-  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #display {
+      font-size: 4rem;
+      margin: 20px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 <body>
   <h1>Interval Timer</h1>
@@ -15,9 +30,106 @@
   <div id="display">00:00</div>
   <div id="status">Ready</div>
   <button id="startBtn">Start</button>
+  <button id="pauseBtn">Pause</button>
   <button id="resetBtn">Reset</button>
 
-  <audio id="beep" src="beep.mp3" preload="auto"></audio>
-  <script src="script.js"></script>
+  <script>
+    let interval;
+    let isRunning = false;
+    let isPaused = false;
+    let currentRound = 1;
+    let isWork = true;
+    let timeLeft = 0;
+
+    const workInput = document.getElementById('workTime');
+    const restInput = document.getElementById('restTime');
+    const roundsInput = document.getElementById('rounds');
+    const display = document.getElementById('display');
+    const status = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    startBtn.addEventListener('click', () => {
+      if (!isRunning) {
+        startTimer();
+      } else if (isPaused) {
+        resumeTimer();
+      }
+    });
+
+    pauseBtn.addEventListener('click', pauseTimer);
+    resetBtn.addEventListener('click', resetTimer);
+
+    function startTimer() {
+      isRunning = true;
+      isPaused = false;
+      isWork = true;
+      currentRound = 1;
+      timeLeft = parseInt(workInput.value);
+      updateStatus();
+      updateDisplay();
+      interval = setInterval(tick, 1000);
+    }
+
+    function tick() {
+      if (timeLeft > 0) {
+        timeLeft--;
+        updateDisplay();
+      } else {
+        if (isWork) {
+          isWork = false;
+          timeLeft = parseInt(restInput.value);
+        } else {
+          isWork = true;
+          currentRound++;
+          if (currentRound > parseInt(roundsInput.value)) {
+            resetTimer();
+            return;
+          }
+          timeLeft = parseInt(workInput.value);
+        }
+        updateStatus();
+        updateDisplay();
+      }
+    }
+
+    function pauseTimer() {
+      if (isRunning && !isPaused) {
+        clearInterval(interval);
+        isPaused = true;
+        status.textContent = "Paused";
+      }
+    }
+
+    function resumeTimer() {
+      if (isRunning && isPaused) {
+        isPaused = false;
+        updateStatus();
+        interval = setInterval(tick, 1000);
+      }
+    }
+
+    function updateDisplay() {
+      const min = Math.floor(timeLeft / 60);
+      const sec = timeLeft % 60;
+      display.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    }
+
+    function updateStatus() {
+      status.textContent = `${isWork ? 'Work' : 'Rest'} - Round ${currentRound}`;
+    }
+
+    function resetTimer() {
+      clearInterval(interval);
+      isRunning = false;
+      isPaused = false;
+      timeLeft = 0;
+      currentRound = 1;
+      isWork = true;
+      display.textContent = "00:00";
+      status.textContent = "Ready";
+    }
+  </script>
 </body>
 </html>
