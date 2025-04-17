@@ -132,15 +132,18 @@
 
     // Start the 10-second countdown before the workout starts
     function startCountdown() {
-      let countdown = 10;
-      const countdownInterval = setInterval(() => {
-        speak(`Workout starting in ${countdown} seconds`);
-        countdown--;
-        if (countdown < 0) {
-          clearInterval(countdownInterval);
-          startTimer(); // Start the actual timer after countdown
-        }
-      }, 1000);
+    let countdown = 10;
+    const countdownInterval = setInterval(() => {
+    if (countdown === 10 || countdown === 5) {
+      speak(`Workout starting in ${countdown} seconds`);
+    }
+    countdown--;
+    if (countdown < 0) {
+      clearInterval(countdownInterval);
+      startTimer(); // Start the actual timer after countdown
+    }
+    }, 1000);
+      
     }
 
     function startTimer() {
