@@ -84,18 +84,29 @@
     const synth = window.speechSynthesis;
 
     function speak(text) {
-    const utterance = new SpeechSynthesisUtterance(text);
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  function setVoiceAndSpeak() {
     const voices = synth.getVoices();
     const soothingVoice = voices.find(voice =>
-    voice.name.includes("Google UK English Female") ||
-    voice.name.includes("Microsoft Zira") ||
-    voice.name.toLowerCase().includes("soft") ||
-    voice.default
+      voice.name.includes("Google UK English Female") ||
+      voice.name.includes("Microsoft Zira") ||
+      voice.name.toLowerCase().includes("soft") ||
+      voice.default
     );
     utterance.voice = soothingVoice;
-    utterance.rate = 0.9; // Slightly slower for calmness
+    utterance.rate = 0.9;
     synth.speak(utterance);
-    }
+  }
+
+  if (synth.getVoices().length === 0) {
+    // Wait for voices to be loaded
+    synth.addEventListener("voiceschanged", setVoiceAndSpeak);
+  } else {
+    setVoiceAndSpeak();
+  }
+}
+
 
     fetch('workouts.json')
       .then(response => response.json())
