@@ -20,16 +20,16 @@
       font-size: 1rem;
     }
     .workout-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    justify-items: center;
-    margin: 20px auto;
-    max-width: 600px;
-    text-align: left;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px auto;
+      max-width: 400px;
+      text-align: left;
     }
+    
     .workout-list label {
-      width: auto;
+      width: 50%;
       margin-bottom: 5px;
     }
     #currentWorkout {
@@ -52,7 +52,7 @@
   <div class="workout-list" id="workoutChecklist">
     <label style="width: 100%"><input type="checkbox" id="selectAll"> Select All Workouts</label>
   </div>
-  <label>Work Duration (sec): <input type="number" id="workTime" value="30"></label>
+  <label>Work Duration (sec): <input type="number" id="workTime" value="45"></label>
   <p>Rest time between workouts is fixed at 15 seconds.</p>
 
   <div id="display">00:00</div>
