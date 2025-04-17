@@ -20,16 +20,16 @@
       font-size: 1rem;
     }
     .workout-list {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      justify-items: center;
       margin: 20px auto;
-      max-width: 400px;
+      max-width: 600px;
       text-align: left;
     }
-    
     .workout-list label {
-      width: 50%;
+      width: auto;
       margin-bottom: 5px;
     }
     #currentWorkout {
@@ -62,6 +62,7 @@
   <button id="pauseBtn">Pause</button>
   <button id="resetBtn">Reset</button>
 
+  <!-- Audio files for beep and announcements -->
   <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
   <audio id="announce" src=""></audio>
 
@@ -120,7 +121,7 @@
 
         workoutChecklist.style.display = 'none';
         selectAllCheckbox.parentElement.style.display = 'none';
-        startTimer();
+        startCountdown();
       } else if (isPaused) {
         resumeTimer();
       }
@@ -128,6 +129,19 @@
 
     pauseBtn.addEventListener('click', pauseTimer);
     resetBtn.addEventListener('click', resetTimer);
+
+    // Start the 10-second countdown before the workout starts
+    function startCountdown() {
+      let countdown = 10;
+      const countdownInterval = setInterval(() => {
+        speak(`Workout starting in ${countdown} seconds`);
+        countdown--;
+        if (countdown < 0) {
+          clearInterval(countdownInterval);
+          startTimer(); // Start the actual timer after countdown
+        }
+      }, 1000);
+    }
 
     function startTimer() {
       isRunning = true;
