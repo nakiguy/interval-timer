@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Interval Timer with Countdown</title>
+  <title>Interval Timer</title>
   <style>
     body {
       font-family: sans-serif;
@@ -40,7 +40,7 @@
   </style>
 </head>
 <body>
-  <h1>Interval Timer with Countdown</h1>
+  <h1>Interval Timer</h1>
 
   <div class="workout-list" id="workoutChecklist">
     <label style="width: 100%"><input type="checkbox" id="selectAll"> Select All Workouts</label>
@@ -53,15 +53,11 @@
   <div id="status">Ready</div>
   <div id="currentWorkout">Current Workout: </div>
 
-  <button id="startBtn">Start Countdown</button>
+  <button id="startBtn">Start</button>
   <button id="pauseBtn">Pause</button>
   <button id="resetBtn">Reset</button>
 
-  <audio id="announce" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-
   <script>
-    let interval;
-    let countdown = 10;
     let timerInterval;
     let isRunning = false;
     let isPaused = false;
@@ -74,7 +70,6 @@
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const resetBtn = document.getElementById('resetBtn');
-    const announce = document.getElementById('announce');
     const workoutChecklist = document.getElementById('workoutChecklist');
     const workInput = document.getElementById('workTime');
     const selectAllCheckbox = document.getElementById('selectAll');
@@ -83,7 +78,6 @@
     let selectedWorkouts = [];
     let workoutsData = [];
 
-    // Fetch workout list from external JSON file
     fetch('workouts.json')
       .then(response => response.json())
       .then(workouts => {
@@ -94,43 +88,18 @@
           workoutChecklist.appendChild(label);
         });
 
-        // Select all toggle
         selectAllCheckbox.addEventListener('change', () => {
           const checkboxes = document.querySelectorAll('.workout-checkbox');
           checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
         });
       });
 
-    // Set up the speech synthesis with a soothing voice
-    const synth = window.speechSynthesis;
-    let soothingVoice;
-
-    function setSoothingVoice() {
-      const voices = synth.getVoices();
-      soothingVoice = voices.find(voice => voice.name.toLowerCase().includes('samantha') || voice.name.toLowerCase().includes('serena'));
-      if (!soothingVoice) {
-        soothingVoice = voices[0]; // Default to the first available voice if no soothing voice found
-      }
+    function updateDisplay(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      display.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
     }
 
-    // Start the 10-second countdown before the workout starts
-    function startCountdown() {
-      countdown = 10;
-      status.textContent = "Starting in 10 seconds...";
-      const countdownInterval = setInterval(() => {
-        if (countdown === 10 || countdown === 5) {
-          speak(`Workout starting in ${countdown} seconds`);
-        }
-        countdown--;
-        updateDisplay(countdown);
-        if (countdown < 0) {
-          clearInterval(countdownInterval);
-          startTimer(); // Start the actual timer after countdown
-        }
-      }, 1000);
-    }
-
-    // Start the main timer after the countdown finishes
     function startTimer() {
       isRunning = true;
       isPaused = false;
@@ -141,27 +110,25 @@
       timeLeft = parseInt(workInput.value);
       updateDisplay(timeLeft);
 
-      // Main timer logic
       timerInterval = setInterval(() => {
         if (timeLeft > 0) {
           timeLeft--;
           updateDisplay(timeLeft);
         } else {
-          // If time for a round has ended, switch to next round or rest
           if (isWork) {
             isWork = false;
-            timeLeft = 15; // Rest time
+            timeLeft = 15;
             status.textContent = `Rest - Round ${currentRound}`;
             currentWorkoutLabel.textContent = `Rest - Round ${currentRound}`;
           } else {
             isWork = true;
             currentRound++;
             if (currentRound > selectedWorkouts.length) {
-              clearInterval(timerInterval); // End the timer after all rounds are completed
+              clearInterval(timerInterval);
               status.textContent = "Workout Complete!";
               currentWorkoutLabel.textContent = "All workouts are done!";
             } else {
-              timeLeft = parseInt(workInput.value); // Set work time for the next round
+              timeLeft = parseInt(workInput.value);
               status.textContent = `Work - Round ${currentRound}`;
               currentWorkoutLabel.textContent = `Current: ${selectedWorkouts[currentRound - 1]}`;
             }
@@ -170,23 +137,6 @@
       }, 1000);
     }
 
-    // Update the display with the current countdown value
-    function updateDisplay(seconds) {
-      const min = Math.floor(seconds / 60);
-      const sec = seconds % 60;
-      display.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-    }
-
-    // Speak the announcement with a soothing voice
-    function speak(text) {
-      const msg = new SpeechSynthesisUtterance(text);
-      msg.voice = soothingVoice;  // Use the soothing voice
-      msg.pitch = 1.5; // Slightly higher pitch for a soothing effect
-      msg.rate = 0.9;  // Slower rate for calming speech
-      synth.speak(msg);
-    }
-
-    // Event Listeners
     startBtn.addEventListener('click', () => {
       const checked = document.querySelectorAll('.workout-checkbox:checked');
       if (checked.length === 0) {
@@ -196,27 +146,24 @@
       selectedWorkouts = Array.from(checked).map(cb => workoutsData[cb.value]);
       workoutChecklist.style.display = 'none';
       selectAllCheckbox.parentElement.style.display = 'none';
-      status.textContent = "Starting countdown...";
-      setSoothingVoice(); // Set the soothing voice
-      startCountdown();
+      currentWorkoutLabel.textContent = `Current: ${selectedWorkouts[0]}`;
+      startTimer();
     });
 
     pauseBtn.addEventListener('click', () => {
       if (isRunning && !isPaused) {
-        clearInterval(timerInterval);  // Pause the timer
+        clearInterval(timerInterval);
         isPaused = true;
         status.textContent = "Paused";
       } else if (isRunning && isPaused) {
         isPaused = false;
         status.textContent = "Resumed";
-        startTimer();  // Resume the timer
+        startTimer();
       }
     });
 
     resetBtn.addEventListener('click', () => {
       clearInterval(timerInterval);
-      clearInterval(countdown);
-      countdown = 10;
       isRunning = false;
       isPaused = false;
       status.textContent = "Ready";
