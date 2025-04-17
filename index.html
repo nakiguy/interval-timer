@@ -51,9 +51,10 @@
 
   <div id="display">00:00</div>
   <div id="status">Ready</div>
-  <div id="currentWorkout"></div>
+  <div id="currentWorkout">Current Workout: </div>
 
   <button id="startBtn">Start Countdown</button>
+  <button id="pauseBtn">Pause</button>
   <button id="resetBtn">Reset</button>
 
   <audio id="announce" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
@@ -61,9 +62,17 @@
   <script>
     let interval;
     let countdown = 10;
+    let timerInterval;
+    let isRunning = false;
+    let isPaused = false;
+    let currentRound = 1;
+    let isWork = true;
+    let timeLeft = 0;
+
     const display = document.getElementById('display');
     const status = document.getElementById('status');
     const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
     const resetBtn = document.getElementById('resetBtn');
     const announce = document.getElementById('announce');
     const workoutChecklist = document.getElementById('workoutChecklist');
@@ -123,14 +132,17 @@
 
     // Start the main timer after the countdown finishes
     function startTimer() {
+      isRunning = true;
+      isPaused = false;
       status.textContent = "Workout Started!";
       display.textContent = "00:00";
-      let timeLeft = parseInt(workInput.value);
-      let currentRound = 1;
-      let isWork = true;
+      currentRound = 1;
+      isWork = true;
+      timeLeft = parseInt(workInput.value);
+      updateDisplay(timeLeft);
 
       // Main timer logic
-      interval = setInterval(() => {
+      timerInterval = setInterval(() => {
         if (timeLeft > 0) {
           timeLeft--;
           updateDisplay(timeLeft);
@@ -140,15 +152,18 @@
             isWork = false;
             timeLeft = 15; // Rest time
             status.textContent = `Rest - Round ${currentRound}`;
+            currentWorkoutLabel.textContent = `Rest - Round ${currentRound}`;
           } else {
             isWork = true;
             currentRound++;
             if (currentRound > selectedWorkouts.length) {
-              clearInterval(interval); // End the timer after all rounds are completed
+              clearInterval(timerInterval); // End the timer after all rounds are completed
               status.textContent = "Workout Complete!";
+              currentWorkoutLabel.textContent = "All workouts are done!";
             } else {
               timeLeft = parseInt(workInput.value); // Set work time for the next round
               status.textContent = `Work - Round ${currentRound}`;
+              currentWorkoutLabel.textContent = `Current: ${selectedWorkouts[currentRound - 1]}`;
             }
           }
         }
@@ -186,13 +201,29 @@
       startCountdown();
     });
 
+    pauseBtn.addEventListener('click', () => {
+      if (isRunning && !isPaused) {
+        clearInterval(timerInterval);  // Pause the timer
+        isPaused = true;
+        status.textContent = "Paused";
+      } else if (isRunning && isPaused) {
+        isPaused = false;
+        status.textContent = "Resumed";
+        startTimer();  // Resume the timer
+      }
+    });
+
     resetBtn.addEventListener('click', () => {
-      clearInterval(interval);
+      clearInterval(timerInterval);
+      clearInterval(countdown);
       countdown = 10;
+      isRunning = false;
+      isPaused = false;
       status.textContent = "Ready";
       display.textContent = "00:00";
       workoutChecklist.style.display = 'block';
       selectAllCheckbox.parentElement.style.display = 'block';
+      currentWorkoutLabel.textContent = "";
     });
   </script>
 </body>
