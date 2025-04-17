@@ -20,15 +20,16 @@
       font-size: 1rem;
     }
     .workout-list {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 20px auto;
-      max-width: 400px;
-      text-align: left;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    justify-items: center;
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: left;
     }
     .workout-list label {
-      width: 50%;
+      width: auto;
       margin-bottom: 5px;
     }
     #currentWorkout {
