@@ -80,6 +80,7 @@
 
     let selectedWorkouts = [];
     let workoutsData = [];
+    let wakeLock = null;
 
     const synth = window.speechSynthesis;
 
@@ -108,6 +109,26 @@
         setVoiceAndSpeak();
       }
     }
+
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          console.log('Wake Lock is active');
+          wakeLock.addEventListener('release', () => {
+            console.log('Wake Lock was released');
+          });
+        }
+      } catch (err) {
+        console.error(`${err.name}, ${err.message}`);
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (wakeLock !== null && document.visibilityState === "visible") {
+        requestWakeLock();
+      }
+    });
 
     fetch('workouts.json')
       .then(response => response.json())
@@ -195,6 +216,7 @@
         alert("Please select at least one workout.");
         return;
       }
+      requestWakeLock();
       beepSound.play().catch(() => {});
       selectedWorkouts = Array.from(checked).map(cb => workoutsData[cb.value]);
       workoutChecklist.style.display = 'none';
