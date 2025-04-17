@@ -47,11 +47,11 @@ function tick() {
 function updateDisplay() {
   let min = Math.floor(timeLeft / 60);
   let sec = timeLeft % 60;
-  display.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  display.textContent = \`\${String(min).padStart(2, '0')}:\${String(sec).padStart(2, '0')}\`;
 }
 
 function updateStatus() {
-  status.textContent = `${isWork ? 'Work' : 'Rest'} - Round ${currentRound}`;
+  status.textContent = \`\${isWork ? 'Work' : 'Rest'} - Round \${currentRound}\`;
   updateDisplay();
 }
 
