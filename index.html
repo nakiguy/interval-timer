@@ -23,13 +23,35 @@
       font-size: 1.5rem;
       margin-top: 20px;
     }
+    .workout-list {
+      display: block;
+      text-align: left;
+      margin: 20px auto;
+      width: 300px;
+    }
+    .workout-list label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    #currentWorkout {
+      font-size: 1.5rem;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>Interval Timer with Countdown</h1>
 
+  <div class="workout-list" id="workoutChecklist">
+    <label style="width: 100%"><input type="checkbox" id="selectAll"> Select All Workouts</label>
+  </div>
+
+  <label>Work Duration (sec): <input type="number" id="workTime" value="45"></label>
+  <p>Rest time between workouts is fixed at 15 seconds.</p>
+
   <div id="display">00:00</div>
   <div id="status">Ready</div>
+  <div id="currentWorkout"></div>
 
   <button id="startBtn">Start Countdown</button>
   <button id="resetBtn">Reset</button>
@@ -44,6 +66,31 @@
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
     const announce = document.getElementById('announce');
+    const workoutChecklist = document.getElementById('workoutChecklist');
+    const workInput = document.getElementById('workTime');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const currentWorkoutLabel = document.getElementById('currentWorkout');
+
+    let selectedWorkouts = [];
+    let workoutsData = [];
+
+    // Fetch workout list from external JSON file
+    fetch('workouts.json')
+      .then(response => response.json())
+      .then(workouts => {
+        workoutsData = workouts;
+        workouts.forEach((workout, index) => {
+          const label = document.createElement('label');
+          label.innerHTML = `<input type="checkbox" class="workout-checkbox" value="${index}"> ${workout}`;
+          workoutChecklist.appendChild(label);
+        });
+
+        // Select all toggle
+        selectAllCheckbox.addEventListener('change', () => {
+          const checkboxes = document.querySelectorAll('.workout-checkbox');
+          checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+        });
+      });
 
     // Set up the speech synthesis with a soothing voice
     const synth = window.speechSynthesis;
@@ -97,6 +144,14 @@
 
     // Event Listeners
     startBtn.addEventListener('click', () => {
+      const checked = document.querySelectorAll('.workout-checkbox:checked');
+      if (checked.length === 0) {
+        alert("Please select at least one workout.");
+        return;
+      }
+      selectedWorkouts = Array.from(checked).map(cb => workoutsData[cb.value]);
+      workoutChecklist.style.display = 'none';
+      selectAllCheckbox.parentElement.style.display = 'none';
       status.textContent = "Starting countdown...";
       setSoothingVoice(); // Set the soothing voice
       startCountdown();
@@ -107,5 +162,9 @@
       countdown = 10;
       status.textContent = "Ready";
       display.textContent = "00:00";
+      workoutChecklist.style.display = 'block';
+      selectAllCheckbox.parentElement.style.display = 'block';
     });
-  </script
+  </script>
+</body>
+</html>
