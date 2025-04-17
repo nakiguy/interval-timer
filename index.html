@@ -107,6 +107,7 @@
     // Start the 10-second countdown before the workout starts
     function startCountdown() {
       countdown = 10;
+      status.textContent = "Starting in 10 seconds...";
       const countdownInterval = setInterval(() => {
         if (countdown === 10 || countdown === 5) {
           speak(`Workout starting in ${countdown} seconds`);
@@ -120,10 +121,38 @@
       }, 1000);
     }
 
-    // Start the main timer
+    // Start the main timer after the countdown finishes
     function startTimer() {
       status.textContent = "Workout Started!";
       display.textContent = "00:00";
+      let timeLeft = parseInt(workInput.value);
+      let currentRound = 1;
+      let isWork = true;
+
+      // Main timer logic
+      interval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateDisplay(timeLeft);
+        } else {
+          // If time for a round has ended, switch to next round or rest
+          if (isWork) {
+            isWork = false;
+            timeLeft = 15; // Rest time
+            status.textContent = `Rest - Round ${currentRound}`;
+          } else {
+            isWork = true;
+            currentRound++;
+            if (currentRound > selectedWorkouts.length) {
+              clearInterval(interval); // End the timer after all rounds are completed
+              status.textContent = "Workout Complete!";
+            } else {
+              timeLeft = parseInt(workInput.value); // Set work time for the next round
+              status.textContent = `Work - Round ${currentRound}`;
+            }
+          }
+        }
+      }, 1000);
     }
 
     // Update the display with the current countdown value
