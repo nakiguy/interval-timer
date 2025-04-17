@@ -57,7 +57,7 @@
   <button id="pauseBtn">Pause</button>
   <button id="resetBtn">Reset</button>
 
-  <audio id="beepSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+  <audio id="beepSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.mp3" preload="auto"></audio>
 
   <script>
     let timerInterval;
@@ -131,6 +131,11 @@
       display.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
     }
 
+    function playBeep() {
+      const beepClone = beepSound.cloneNode();
+      beepClone.play().catch(() => {});
+    }
+
     function startTimer() {
       isRunning = true;
       isPaused = false;
@@ -156,7 +161,7 @@
           }
 
           if (timeLeft <= 3 && timeLeft > 0) {
-            beepSound.play();
+            playBeep();
           }
         } else {
           if (isWork) {
