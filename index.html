@@ -23,9 +23,9 @@
 </head>
 <body>
   <h1>Interval Timer</h1>
-  <label>Work (sec): <input type="number" id="workTime" value="30"></label>
-  <label>Rest (sec): <input type="number" id="restTime" value="10"></label>
-  <label>Rounds: <input type="number" id="rounds" value="5"></label>
+  <label>Workouts (1-17): <input type="number" id="workouts" min="1" max="17" value="5"></label>
+  <label>Work Duration (sec): <input type="number" id="workTime" value="30"></label>
+  <p>Rest time between workouts is fixed at 15 seconds.</p>
   
   <div id="display">00:00</div>
   <div id="status">Ready</div>
@@ -41,14 +41,15 @@
     let isWork = true;
     let timeLeft = 0;
 
+    const workoutsInput = document.getElementById('workouts');
     const workInput = document.getElementById('workTime');
-    const restInput = document.getElementById('restTime');
-    const roundsInput = document.getElementById('rounds');
     const display = document.getElementById('display');
     const status = document.getElementById('status');
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const resetBtn = document.getElementById('resetBtn');
+
+    const restTime = 15;
 
     startBtn.addEventListener('click', () => {
       if (!isRunning) {
@@ -79,11 +80,11 @@
       } else {
         if (isWork) {
           isWork = false;
-          timeLeft = parseInt(restInput.value);
+          timeLeft = restTime;
         } else {
           isWork = true;
           currentRound++;
-          if (currentRound > parseInt(roundsInput.value)) {
+          if (currentRound > parseInt(workoutsInput.value)) {
             resetTimer();
             return;
           }
@@ -117,7 +118,11 @@
     }
 
     function updateStatus() {
-      status.textContent = `${isWork ? 'Work' : 'Rest'} - Round ${currentRound}`;
+      if (currentRound > parseInt(workoutsInput.value)) {
+        status.textContent = "Done!";
+      } else {
+        status.textContent = `${isWork ? 'Work' : 'Rest'} - Workout ${currentRound}`;
+      }
     }
 
     function resetTimer() {
