@@ -70,11 +70,17 @@
     let totalRounds = 0;
 
     // Create checkboxes for workouts 1-17
-    for (let i = 1; i <= 17; i++) {
+// Fetch workout list from JSON file
+fetch('workouts.json')
+  .then(response => response.json())
+  .then(workouts => {
+    workouts.forEach((workout, index) => {
       const label = document.createElement('label');
-      label.innerHTML = `<input type="checkbox" class="workout-checkbox" value="${i}"> Workout ${i}`;
+      label.innerHTML = `<input type="checkbox" class="workout-checkbox" value="${index + 1}"> ${workout}`;
       workoutChecklist.appendChild(label);
-    }
+    });
+  });
+
 
     startBtn.addEventListener('click', () => {
       if (!isRunning) {
