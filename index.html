@@ -85,6 +85,7 @@
     const synth = window.speechSynthesis;
 
     function speak(text) {
+      if (synth.speaking) synth.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
 
       function setVoiceAndSpeak() {
