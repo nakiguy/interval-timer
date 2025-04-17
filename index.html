@@ -19,14 +19,26 @@
       padding: 10px 20px;
       font-size: 1rem;
     }
+    .workout-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px auto;
+      max-width: 400px;
+      text-align: left;
+    }
+    .workout-list label {
+      width: 50%;
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
   <h1>Interval Timer</h1>
-  <label>Workouts (1-17): <input type="number" id="workouts" min="1" max="17" value="5"></label>
+  <div class="workout-list" id="workoutChecklist"></div>
   <label>Work Duration (sec): <input type="number" id="workTime" value="30"></label>
   <p>Rest time between workouts is fixed at 15 seconds.</p>
-  
+
   <div id="display">00:00</div>
   <div id="status">Ready</div>
   <button id="startBtn">Start</button>
@@ -45,7 +57,6 @@
     let timeLeft = 0;
     let workDuration = 0;
 
-    const workoutsInput = document.getElementById('workouts');
     const workInput = document.getElementById('workTime');
     const display = document.getElementById('display');
     const status = document.getElementById('status');
@@ -53,11 +64,25 @@
     const pauseBtn = document.getElementById('pauseBtn');
     const resetBtn = document.getElementById('resetBtn');
     const beep = document.getElementById('beep');
+    const workoutChecklist = document.getElementById('workoutChecklist');
 
     const restTime = 15;
+    let totalRounds = 0;
+
+    // Create checkboxes for workouts 1-17
+    for (let i = 1; i <= 17; i++) {
+      const label = document.createElement('label');
+      label.innerHTML = `<input type="checkbox" class="workout-checkbox" value="${i}"> Workout ${i}`;
+      workoutChecklist.appendChild(label);
+    }
 
     startBtn.addEventListener('click', () => {
       if (!isRunning) {
+        totalRounds = document.querySelectorAll('.workout-checkbox:checked').length;
+        if (totalRounds === 0) {
+          alert("Please select at least one workout.");
+          return;
+        }
         startTimer();
       } else if (isPaused) {
         resumeTimer();
@@ -83,7 +108,6 @@
       if (timeLeft > 0) {
         timeLeft--;
 
-        // Audio and spoken alerts
         if (isWork) {
           if (timeLeft === Math.floor(workDuration / 2)) {
             speak("Half the time is done");
@@ -102,7 +126,7 @@
         } else {
           isWork = true;
           currentRound++;
-          if (currentRound > parseInt(workoutsInput.value)) {
+          if (currentRound > totalRounds) {
             resetTimer();
             return;
           }
@@ -141,7 +165,7 @@
     }
 
     function updateStatus() {
-      if (currentRound > parseInt(workoutsInput.value)) {
+      if (currentRound > totalRounds) {
         status.textContent = "Done!";
       } else {
         status.textContent = `${isWork ? 'Work' : 'Rest'} - Workout ${currentRound}`;
